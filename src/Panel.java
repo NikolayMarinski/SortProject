@@ -1,32 +1,27 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Random;
 import java.util.function.IntConsumer;
 
 public class Panel extends JPanel {
+
     JComboBox<Object> jComboBox2 = new JComboBox<>();
+    JButton SortButton1 = new JButton();
+    JButton ResetButton = new JButton();
     Integer[] array = {6, 1, 3, 5, 2, 4};
 
 
     Panel() {
-        setPreferredSize(new Dimension(1500, 800));
-
-        JButton SortButton1 = new JButton();
-        JButton ResetButton = new JButton();
-
+        setPreferredSize(new Dimension(2400, 800));
 
         setBackground(new java.awt.Color(51, 153, 255));
 
         jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[]{"Bubble sort", "Selection sort", "Insertion sort", "Merge sort", "Quick sort", "Heap sort"}));
-        jComboBox2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jComboBox2ActionPerformed(evt);
-            }
-        });
-
+        jComboBox2.addActionListener(this::jComboBox2ActionPerformed);
         SortButton1.setText("Sort");
         ResetButton.setText("Reset");
         SortButton1.addActionListener(new java.awt.event.ActionListener() {
@@ -38,38 +33,41 @@ public class Panel extends JPanel {
         this.add(jComboBox2);
         this.add(SortButton1);
         ResetButton.addActionListener(this::resetArray);
-
-        add(ResetButton);
+        this.add(ResetButton);
     }
 
     private void resetArray(ActionEvent evt) {
-//        List<java.lang.Integer> list = (List<Integer>) Arrays.asList(array);
-//        Collections.shuffle(list);
-//        array = list.toArray(new Integer[0]);
-//        repaint();
+        var list = Arrays.asList(1, 2, 3, 4, 5, 6);
+        Collections.shuffle(list);
+        array = list.toArray(new Integer[0]);
+        repaint();
     }
 
 
     private void jComboBox2ActionPerformed(java.awt.event.ActionEvent evt) {
-
     }
 
     private void SortButton1ActionPerformed(java.awt.event.ActionEvent evt) {
         String selected = jComboBox2.getSelectedItem().toString();
         switch (selected) {
             case "Bubble sort":
-                animate(i->bubbleSort(array, i), 200);
+                animate(i -> bubbleSort(array, i), 200);
                 break;
             case "Selection sort":
-                animate(i->selectionSort(array, i), 200);
+                animate(i -> selectionSort(array, i), 200);
+                break;
             case "Insertion sort":
-                animate(i->insertionSort(array, i), 200);
+                animate(i -> insertionSort(array, i), 200);
+                break;
             case "Merge sort":
-                //Merge sort
+                new Thread(() -> mergeSort(array, 0, array.length - 1)).start();
+                break;
             case "Quick sort":
-                //Quick sort
+                new Thread(() -> quickSort(array, 0, array.length - 1)).start();
+                break;
             case "Heap sort":
-                //Heap sort
+                new Thread(() -> heapSort(array)).start();
+                break;
         }
     }
 
@@ -96,18 +94,18 @@ public class Panel extends JPanel {
         super.paintComponent(g);
         setBackground(Color.BLUE);
         for (int i = 0; i < array.length; i++) {
-            int imageSize = array[i] * 50; // Each element multiplied by 50
+            int imageSize = array[i] * 50;
 
             // Load an image
-            ImageIcon icon = new ImageIcon("C:\\Users\\nnn\\IdeaProjects\\SortProject\\src\\resourses\\mustang.jpg");
+            ImageIcon icon = new ImageIcon("C:\\Users\\nnn\\IdeaProjects\\SortProject\\src\\resourses\\Nemo.png");
             Image image = icon.getImage();
 
             // Draw the image with calculated size
-            g.drawImage(image, imageSize + i * 200, getHeight() - imageSize - 50, imageSize, imageSize, this);
+            g.drawImage(image, i * 315 + 20, getHeight() - imageSize - 50, imageSize, imageSize, this);
         }
     }
 
-    public void bubbleSort(int[] array, int target) {
+    public void bubbleSort(Integer[] array, int target) {
         int i = target;
         for (int j = i + 1; j < array.length; j++) {
             if (array[i] > array[j]) {
@@ -119,7 +117,7 @@ public class Panel extends JPanel {
         }
     }
 
-    public void selectionSort(int[] array, int target) {
+    public void selectionSort(Integer[] array, int target) {
         int min = target;
         for (int i = target + 1; i < array.length; i++) {
             if (array[min] > array[i])
@@ -132,7 +130,7 @@ public class Panel extends JPanel {
         }
     }
 
-    void insertionSort(int[] array, int index) {
+    void insertionSort(Integer[] array, int index) {
 
         int key = array[index];
         int j = index - 1;
@@ -145,6 +143,124 @@ public class Panel extends JPanel {
             j = j - 1;
         }
         array[j + 1] = key;
+    }
+
+    void sort(Integer[] array, int low, int mid, int high) {
+        Integer[] temp = Arrays.copyOf(array, array.length);
+        int i = low, j = mid + 1, k = low;
+        while (i <= mid && j <= high) {
+            if (temp[i] <= temp[j]) {
+                array[k++] = temp[i++];
+            } else {
+                array[k++] = temp[j++];
+            }
+        }
+        while (i <= mid) {
+            array[k++] = temp[i++];
+        }
+        while (j <= high) {
+            array[k++] = temp[j++];
+        }
+    }
+
+    void mergeSort(Integer[] array, int l, int h) {
+        if (l < h) {
+
+            int m = l + (h - l) / 2;
+
+            mergeSort(array, l, m);
+            mergeSort(array, m + 1, h);
+
+            sort(array, l, m, h);
+            repaint();
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    void swap(Integer[] arr, int i, int j) {
+        int temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+    }
+
+    int partition(Integer[] arr, int low, int high) {
+        int pivot = arr[high];
+
+        int i = (low - 1);
+
+        for (int j = low; j <= high - 1; j++) {
+
+            if (arr[j] < pivot) {
+
+                i++;
+                swap(arr, i, j);
+            }
+        }
+        swap(arr, i + 1, high);
+        return (i + 1);
+    }
+
+    void quickSort(Integer[] arr, int low, int high) {
+        if (low < high) {
+
+
+            int pi = partition(arr, low, high);
+            quickSort(arr, low, pi - 1);
+            quickSort(arr, pi + 1, high);
+
+            repaint();
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public void heapSort(Integer[] arr) {
+        int N = arr.length;
+
+        for (int i = N / 2 - 1; i >= 0; i--)
+            heapify(arr, N, i);
+
+        for (int i = N - 1; i > 0; i--) {
+            int temp = arr[0];
+            arr[0] = arr[i];
+            arr[i] = temp;
+
+            heapify(arr, i, 0);
+
+            repaint();
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    void heapify(Integer[] arr, int N, int i) {
+        int largest = i;
+        int l = 2 * i + 1;
+        int r = 2 * i + 2;
+
+        if (l < N && arr[l] > arr[largest])
+            largest = l;
+
+        if (r < N && arr[r] > arr[largest])
+            largest = r;
+
+        if (largest != i) {
+            int swap = arr[i];
+            arr[i] = arr[largest];
+            arr[largest] = swap;
+
+            heapify(arr, N, largest);
+        }
     }
 
 }
